@@ -1,0 +1,175 @@
+<!--
+
+Copyright (c) 2006, the Board of Trustees of Leland
+Stanford Junior University.
+
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+    * Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+
+    * Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the following disclaimer
+in the documentation and/or other materials provided with the
+distribution.
+
+    * Neither the name of Stanford University nor the names of its
+contributors may be used to endorse or promote products derived from
+this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+-->
+
+<!-- 
+  Author: Debashis Sahoo <sahoo@stanford.edu>
+-->
+
+<!-- Installation -->
+<!-- get JArgs from http://jargs.sourceforge.net/ -->
+<!--     copy jargs.jar to lib/jargs.jar          -->
+<!-- define JAVACC_HOME and JAVACC_EXEC path -->
+<!-- get JFlex from http://sourceforge.net/projects/jflex/ -->
+<!--     copy JFlex.jar to lib/JFlex.jar -->
+<!-- get CUP from http://www.cs.princeton.edu/~appel/modern/java/CUP/ -->
+<!--     copy java_cup.jar to lib/java_cup.jar -->
+<!-- get JarBundler from http://informagen.com/JarBundler/ -->
+
+<project name="tools" default="dist" basedir=".">
+    <description>
+        Building tools
+    </description>
+  <!-- set global properties for this build -->
+  <property name="user.name" value="Debashis Sahoo"/>
+  <property name="src" location="tools"/>
+  <property name="build" location="build"/>
+  <property name="dist"  location="dist"/>
+  <property name="jargs.jar" value="lib/jargs.jar"/>
+  <property name="jdom.jar" value="lib/jdom.jar"/>
+  <property name="JAVACC_HOME" value="/booleanfs/sahoo/softwares/javacc-4.2"/>
+  <property name="JAVACC_EXEC" value="${JAVACC_HOME}/bin/javacc"/>
+  <property name="PKGSRC" value="${src}/goanalysis/parser"/>
+
+  <target name="init">
+    <!-- Create the time stamp -->
+    <tstamp/>
+    <!-- Create the build directory structure used by compile -->
+    <mkdir dir="${build}"/>
+  </target>
+
+  <target name="compile" depends="init,parserPreCompile"
+        description="compile the source " >
+    <!-- Compile the java code from ${src} into ${build} -->
+    <javac srcdir="${src}" debug="on" destdir="${build}" source="1.5" target="1.5">
+      <classpath path="${build}:lib/java_cup.jar:${jargs.jar}:${jdom.jar}:${java.class.path}"/>
+      <compilerarg value="-Xlint:unchecked" />
+      <compilerarg value="-Xlint:deprecation" />
+    </javac>
+  </target>
+
+  <target name="parserSrc">
+    <mkdir dir="${PKGSRC}"/>
+    <mkdir dir="${src}/graphs/parser"/>
+    <mkdir dir="${src}/parsers/Expression"/>
+  </target>
+
+  <!-- Use this version for Ant 1.6beta2 and beyond -->
+  <target name="parserPreCompile" depends="parserSrc">
+    <!-- Parse OBO.jj using JAVACC -->
+    <javacc 
+     target="${src}/goanalysis/OBO.jj" 
+     outputdirectory="${PKGSRC}"
+     javacchome="${JAVACC_HOME}" 
+     debugparser="false"
+    />
+    <javacc 
+     target="${src}/graphs/GML.jj" 
+     outputdirectory="${src}/graphs/parser"
+     javacchome="${JAVACC_HOME}" 
+     debugparser="false"
+    />
+    <!-- get JFlex from http://sourceforge.net/projects/jflex/ -->
+    <java classname="JFlex.Main" classpath="lib/JFlex.jar">
+      <arg value="-d"/>
+      <arg value="${src}/parsers/Expression"/>
+      <arg value="${src}/parsers/Expression.flex"/>
+    </java>
+    <!-- get CUP from http://www.cs.princeton.edu/~appel/modern/java/CUP/ -->
+    <java dir="${src}/parsers/Expression"
+          jar="lib/java_cup.jar"
+          fork="true"
+          failonerror="true">
+      <arg value="${src}/parsers/Expression.cup"/>
+    </java>
+  </target>
+
+  <!-- Use this version for Ant 1.5.4 -->
+  <target name="parserPreCompileUsingExec" depends="parserSrc">
+    <exec executable="${JAVACC_EXEC}">
+      <arg value="-output_directory:${PKGSRC}"/>
+      <arg value="-debug_parser"/>
+      <arg value="${src}/goanalysis/OBO.jj"/>
+    </exec>
+    <exec executable="${JAVACC_EXEC}">
+      <arg value="-output_directory:${src}/graphs/parser"/>
+      <arg value="-debug_parser"/>
+      <arg value="${src}/graphs/GML.jj"/>
+    </exec>
+  </target>
+
+  <target name="dist" depends="compile"
+        description="generate the distribution" >
+    <!-- Create the distribution directory -->
+    <mkdir dir="${dist}/lib"/>
+
+    <!-- Put everything in ${build} from the jargs.jar file -->
+    <unjar src="${jargs.jar}" dest="${build}"/>
+
+    <unjar src="lib/java_cup.jar" dest="${build}"/>
+
+    <!-- Put everything in ${build} into the tools.jar file -->
+    <jar jarfile="${dist}/lib/tools.jar" basedir="${build}">
+      <manifest>
+        <attribute name="Built-By" value="${user.name}"/>
+        <attribute name="Main-Class" value="tools.Analyze"/>
+      </manifest>
+    </jar>
+  </target>
+
+  <!-- For building MAC OS application -->
+  <!-- get JarBundler from http://informagen.com/JarBundler/ -->
+  <taskdef name="jarbundler" 
+         classpath="lib/jarbundler-1.9.jar"
+         classname="net.sourceforge.jarbundler.JarBundler" />
+
+  <target name="mac" depends="dist"
+        description="generate the distribution" >
+    <jarbundler dir="${dist}"
+              name="StepMiner"
+              mainclass="tools.SMGui" 
+              icon="images/stepAna.icns" 
+              jar="${dist}/lib/tools.jar" 
+              stubfile="lib/JavaApplicationStub"/>
+  </target>
+
+  <target name="clean"
+        description="clean up" >
+    <!-- Delete the ${build} and ${dist} directory trees -->
+    <delete dir="${build}"/>
+    <delete dir="${dist}"/>
+  </target>
+</project>

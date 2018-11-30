@@ -1,0 +1,56 @@
+<HTML>
+<HEAD>
+</HEAD>
+  <BODY>
+<UL>
+<LI> <OBJECT type="text/sitemap">
+      <param name="Name" value="StepMiner Tutorial">
+      <param name="Local" value="index.html">
+    </OBJECT><UL><LI> <OBJECT type="text/sitemap">
+      <param name="Name" value="What is StepMiner?">
+      <param name="Local" value="pr01.html">
+    </OBJECT><LI> <OBJECT type="text/sitemap">
+      <param name="Name" value="Download">
+      <param name="Local" value="ch01.html">
+    </OBJECT><LI> <OBJECT type="text/sitemap">
+      <param name="Name" value="Install">
+      <param name="Local" value="ch02.html">
+    </OBJECT><UL><LI> <OBJECT type="text/sitemap">
+      <param name="Name" value="Windows">
+      <param name="Local" value="ch02.html#id4725586">
+    </OBJECT><LI> <OBJECT type="text/sitemap">
+      <param name="Name" value="Unix">
+      <param name="Local" value="ch02s02.html">
+    </OBJECT><LI> <OBJECT type="text/sitemap">
+      <param name="Name" value="MAC OS X">
+      <param name="Local" value="ch02s03.html">
+    </OBJECT></UL><LI> <OBJECT type="text/sitemap">
+      <param name="Name" value="Getting started">
+      <param name="Local" value="ch03.html">
+    </OBJECT><UL><LI> <OBJECT type="text/sitemap">
+      <param name="Name" value="Introduction">
+      <param name="Local" value="ch03.html#id4723261">
+    </OBJECT><LI> <OBJECT type="text/sitemap">
+      <param name="Name" value="File descriptions">
+      <param name="Local" value="ch03s02.html">
+    </OBJECT><LI> <OBJECT type="text/sitemap">
+      <param name="Name" value="Windows">
+      <param name="Local" value="ch03s03.html">
+    </OBJECT><UL><LI> <OBJECT type="text/sitemap">
+      <param name="Name" value="Gene Ontology Analysis">
+      <param name="Local" value="ch03s03.html#id4732304">
+    </OBJECT><LI> <OBJECT type="text/sitemap">
+      <param name="Name" value="Were you successful?">
+      <param name="Local" value="ch03s03.html#id4732910">
+    </OBJECT></UL><LI> <OBJECT type="text/sitemap">
+      <param name="Name" value="Unix">
+      <param name="Local" value="ch03s04.html">
+    </OBJECT><LI> <OBJECT type="text/sitemap">
+      <param name="Name" value="MAC OS X">
+      <param name="Local" value="ch03s05.html">
+    </OBJECT></UL><LI> <OBJECT type="text/sitemap">
+      <param name="Name" value="File formats">
+      <param name="Local" value="ch04.html">
+    </OBJECT></UL></UL>
+</BODY>
+</HTML>

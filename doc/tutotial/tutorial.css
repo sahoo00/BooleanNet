@@ -1,0 +1,12 @@
+a, body, div, table, td 
+{ 
+  font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+}
+body
+{
+  background-color: #FFFFFF;
+  color: #000000;
+  margin: 0px 0px 0px 0px;
+  padding    : 0px 5px 5px 5px;
+  border: 1px solid #000000;
+}

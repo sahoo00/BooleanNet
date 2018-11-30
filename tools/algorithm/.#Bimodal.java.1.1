@@ -1,0 +1,86 @@
+package tools.algorithm;
+
+import tools.microarray.*;
+import tools.microarray.StepMiner.*;
+import java.util.*;
+
+public class Bimodal {
+
+    int length_;
+    double threshold_;
+    double statistic_;
+
+    public Bimodal(Double[] vector) {
+      Double[] vector_ = vector;
+      int count = getCount(vector_);
+      length_ = count;
+      statistic_ = 0.0;
+      if (count == 0) {
+        return;
+      }
+      try {
+        Arrays.sort(vector_);
+        AnalysisMetaData meta = new AnalysisMetaData(0, vector_.length-1, 
+            null, null, 0.05);
+        GeneData gene = new GeneData(vector_);
+        Step step = OneStep.fitStep(gene, meta);
+        int index = step.getStep(0);
+        threshold_ = vector_[index];
+        // System.out.println(" Middle = " + threshold_);
+        statistic_ = step.getStatistic();
+        // System.out.println(" T = " + statistic_ );
+      }
+      catch(Exception e) {
+        System.out.println("Count = " + count);
+      }
+    }
+
+    public double getThreshold() { return threshold_; }
+
+    public boolean isBimodal() {
+      double t = statistic_;
+      return (t > length_);
+    }
+
+    public boolean isBimodal(double thr) {
+      double t = statistic_;
+      return (t > thr);
+    }
+
+    public static int getCount(Double[] v) {
+      int count = 0;
+      for (int i =0; i < v.length; i++) {
+        if (v[i] != null) {
+          count++;
+        }
+      }
+      return count;
+    }
+
+    public static Matrix getMatrix(Double[] v) {
+      int count = 0;
+      for (int i =0; i < v.length; i++) {
+        if (v[i] != null) {
+          count++;
+        }
+      }
+      Matrix m = new Matrix(count, 1);
+      int index = 0;
+      for (int i =0; i < v.length ; i++) {
+        if (v[i] != null) {
+          m.setCell(index++, 0, v[i].doubleValue());
+        }
+      }
+      return m;
+    }
+
+    public static boolean check(Double[] v) {
+        return new Bimodal(v).isBimodal();
+    }
+
+    public static boolean check(Double[] v, double thr) {
+        return new Bimodal(v).isBimodal(thr);
+    }
+
+}
+

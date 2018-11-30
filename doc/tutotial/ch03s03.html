@@ -1,0 +1,116 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title> Windows </title><meta name="generator" content="DocBook XSL Stylesheets V1.69.1"><link rel="start" href="index.html" title="StepMiner Tutorial"><link rel="up" href="ch03.html" title="Chapter 3.  Getting started "><link rel="prev" href="ch03s02.html" title=" File descriptions "><link rel="next" href="ch03s04.html" title=" Unix "></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center"> Windows </th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ch03s02.html">Prev</a> </td><th width="60%" align="center">Chapter 3.  Getting started </th><td width="20%" align="right"> <a accesskey="n" href="ch03s04.html">Next</a></td></tr></table><hr></div><div class="sect1" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="windows"></a> Windows </h2></div></div></div><div class="screenshot"><div class="mediaobject" align="center"><img src="unzip.png" align="middle"><div class="caption"><p>Content of StepMiner-1.0 folder under Windows-XP </p></div></div></div><p> Double click on stepminer MS-DOS batch file. StepMiner will appear
+    shortly </p><div class="screenshot"><div class="mediaobject" align="center"><img src="stepminer-win.png" align="middle"><div class="caption"><p>StepMiner window </p></div></div></div><p> open the file <code class="filename"> yeast.pcl </code> using  
+    <span class="guimenu">File</span> &#8594; <span class="guimenuitem">Open</span>
+    </p><div class="screenshot"><div class="mediaobject" align="center"><img src="open.png" align="middle"><div class="caption"><p>  Enter <code class="filename"> yeast.pcl </code>. </p></div></div></div><p> StepMiner opens <code class="filename"> yeast.pcl </code> and
+    displays the headers and the heatmap. On the left StepMiner displays
+    the headers and the timepoints assigned to each array. 
+    To change the time points
+    assigned by the StepMiner, update the text area next to each header
+    and click apply button below. On the right StepMiner displays the
+    heatmap. The heatmap color settings can be changed using 
+    <span class="guimenu">Settings</span> &#8594; <span class="guimenuitem">"Change Settings"</span>. By default it uses green as low, black as zero and
+    red as high.
+    </p><div class="screenshot"><div class="mediaobject" align="center"><img src="open-yeast.png" align="middle"><div class="caption"><p>  <code class="filename"> yeast.pcl </code> opened. </p></div></div></div><p> Click on StepMiner button or click on <span class="guimenu">Analyze</span> &#8594; <span class="guimenuitem">StepMiner</span> menu item to run StepMiner on the file opened.
+   </p><div class="screenshot"><div class="mediaobject" align="center"><img src="stepminer-save.png" align="middle"><div class="caption"><p>Enter a filename to save the StepMiner results in PCL format.
+    </p></div></div></div><p>
+The output file will be in PCL format, but the genes will be reordered
+ by StepMiner as described below.  The PCL file can be explored using
+    <a href="http://jtreeview.sourceforge.net/" target="_top"> Java Treeview </a>.
+    </p><div class="screenshot"><div class="mediaobject" align="center"><img src="stepminer-run.png" align="middle"><div class="caption"><p>Result of the StepMiner analysis is displayed in a dialog box. </p></div></div></div><p> The StepMiner results report the number of one-step (Up or Down) 
+    and the number of two-step (UpDown or DownUp) matches. 
+    The number reported as
+    "Rest" indicates the number of genes that didn't match any steps with
+    the given p-value cutoff. The pvalue cutoff for the StepMiner can be
+    adjusted using 
+    <span class="guimenu">Settings</span> &#8594; <span class="guimenuitem">"Change Settings"</span>. The numbers reported under "Total" are the total number of
+    genes and arrays used for the StepMiner analysis.
+    </p><p> Click on "ok". </p><div class="screenshot"><div class="mediaobject" align="center"><img src="stepminer-heatmap.png" align="middle"><div class="caption"><p><code class="filename"> yeast.pcl </code> heatmap after StepMiner analysis.</p></div></div></div><p>
+    The heatmap clearly shows the steps in the gene expression.
+    Genes are ordered as follows:  The one-step genes are first, followed by
+the two-step genes, followed by genes that could not be classified.
+The one-step and two-step genes are further subdivided by whether
+the first transition is increasing or decreasing (the increasing genes
+are first).  Within those groups, genes are then sorted by the time of
+the first transition, with earlier transitions occuring first.
+    Genes that have the same direction and time of transitions are ordered
+    according to the p-values of the StepMiner.
+    </p><div class="sect2" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="id4732304"></a> Gene Ontology Analysis </h3></div></div></div><p>
+    After StepMiner analysis has been run, an analysis using the
+gene ontology can be performed to see if gene annotations for
+certain functions, processes or components are enriched during
+sets of genes that change in the same way.
+    </p><p>
+    StepMiner's algorithm is derived from that in Gavin Sherlock's 
+GOTermFinder perl script, but has some additional pruning heuristics to
+preferentially report more specific annotations.
+    </p><p>In order to run GO analysis on the StepMiner results, the name of
+    the organism must be specified in the settings. The default value for
+    the organism is set to "Hs" (Human). The GO analysis program 
+    looks for gene annotation file for the organism speciifed 
+    and gene ontology file 
+    in the current working directory. The GO analysis program matches
+    the gene name from the second column of the PCL file to the 
+    gene names present in the gene annotation file and perform a
+    hypergeometric distributation based statistic. The GO analysis
+    program also prunes significant generic GO terms that 
+    includes many significant specific GO terms.
+    </p><p>
+    Following are the annotation files and 
+    links that are used for different organisms. </p><table xml:id="ex.htmltable" align="center" id="ex.htmltable"><caption>Table 3.1. Gene annotation files and their source link</caption><thead><tr>
+        <td>Organism</td>
+        <td>Description</td>
+        <td>Gene annotation file</td>
+      </tr></thead><tbody><tr>
+    <td> Sgd </td>
+    <td> Budding yeast </td>
+    <td> <a href="http://www.geneontology.org/gene-associations/gene_association.sgd.gz" target="_top"> gene_association.sgd </a> </td>
+    </tr><tr>
+    <td> Hs </td>
+    <td> Human </td>
+    <td> <a href="http://www.geneontology.org/gene-associations/gene_association.goa_human.gz" target="_top"> gene_association.goa_human </a> </td>
+    </tr><tr>
+    <td> Mm </td>
+    <td> Mice </td>
+    <td> <a href="http://www.geneontology.org/cgi-bin/downloadGOGA.pl/gene_association.mgi.gz" target="_top"> gene_association.mgi </a> </td>
+    </tr><tr>
+    <td> Pombie </td>
+    <td> Fission yeast </td>
+    <td> <a href="http://www.geneontology.org/cgi-bin/downloadGOGA.pl/gene_association.GeneDB_Spombe.gz" target="_top"> gene_association.GeneDB_Spombe </a> </td>
+    </tr></tbody></table><p> Click on <span class="guimenu">Settings</span> &#8594; <span class="guimenuitem">"Change Settings"</span> menu item.
+   </p><p> Change the "Organism" option to "Sgd" in "GOAnalysis" section </p><div class="screenshot"><div class="mediaobject" align="center"><img src="go-setting.png" align="middle"><div class="caption"><p>GO Analysis settings</p></div></div></div><p> Click on "ok".</p><p> Click on GOAnalysis button or <span class="guimenu">Analyze</span> &#8594; <span class="guimenuitem">GOAnalysis</span> menu item.
+   </p><div class="screenshot"><div class="mediaobject" align="center"><img src="go-ana-file.png" align="middle"><div class="caption"><p>File save dialog after GOAnalysis. Enter <code class="filename"> yeast.html </code>. </p></div></div></div><p>Click on "Save" button to run the GOAnalysis. It might take several
+    minutes for the GO anlysis to finish. StepMiner window will not respond
+    until after the GO analysis finished.</p><p> The results of GO analysis is saved in file <a href="yeast.html" target="_top">
+    yeast.html </a> </p><p> After the GO analysis is finished, open <code class="filename"> yeast.html </code>
+    using a web browser. </p><div class="screenshot"><div class="mediaobject" align="center"><img src="go-html-first.png" align="middle"><div class="caption"><p> GO Analysis on the StepMiner results.</p></div></div></div><p> The GO Analysis is performed on the gene sets of
+    the StepMiner program. The results are grouped into four
+    different categories: one-step (up regulated and down regulated),
+    two-step (up-down and down-up). The user can browse the results
+    by clicking on the 
+    <span class="inlinemediaobject"><img src="http://chicory.stanford.edu/~sahoo/public/plus.gif"></span>
+    . Cick on "ExpandDepth 2" to see all the significant GO terms.
+    </p><div class="screenshot"><div class="mediaobject" align="center"><img src="go-html-depth2.png" align="middle"><div class="caption"><p> Significant GO terms.</p></div></div></div><p> "Other genes: No Match" contains the list if genes 
+    that have none of the GO terms significant. The results show
+    the significant GO terms followed by a list of statistics.
+    In this example
+    the list of genes at "Step 3" have 43 genes, 7 of them have
+    aerobic respiration annotation, 16 of them have mitochondrion etc.
+    Total number of genes in the gene annotation file is 6462,
+    78 of them have aerobic respiration annotation and 711 of them
+    have mitochondrion etc. The following three number represent p-values
+    using the hypergeometric distribution, using FDR correction and
+    using the Bonferroni correction. The GO term id follows the pvalues
+    e.g. GO:0009060 is the GO term id for aerobic respiration.
+    </p></div><div class="sect2" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="id4732910"></a> Were you successful? </h3></div></div></div><p>
+    If not, please contact us at 
+        <a href="mailto:sahoo%20at%20stanford%20dot%20edu" target="_top"> 
+        sahoo at stanford dot edu
+        </a> or 
+        <a href="mailto:dill%20at%20cs%20dot%20stanford%20dot%20edu" target="_top"> 
+        dill at cs dot stanford dot edu
+        </a>.
+    </p><p>
+ We would also like to here any feedback, requests, or comments
+ you may have.  We expect to improve and enhance StepMiner greatly
+ in the future.
+    </p></div></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ch03s02.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="ch03.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="ch03s04.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top"> File descriptions  </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top">  Unix </td></tr></table></div></body></html>

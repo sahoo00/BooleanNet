@@ -1,0 +1,292 @@
+/*
+
+Copyright (c) 2006, the Board of Trustees of Leland
+Stanford Junior University.
+
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+    * Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+
+    * Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the following disclaimer
+in the documentation and/or other materials provided with the
+distribution.
+
+    * Neither the name of Stanford University nor the names of its
+contributors may be used to endorse or promote products derived from
+this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+*/
+
+/*
+ Author: Debashis Sahoo <sahoo@stanford.edu>
+ */
+
+
+options {
+  LOOKAHEAD = 1;
+  CHOICE_AMBIGUITY_CHECK = 2;
+  OTHER_AMBIGUITY_CHECK = 1;
+  STATIC = false;
+  DEBUG_PARSER = false;
+  DEBUG_LOOKAHEAD = false;
+  DEBUG_TOKEN_MANAGER = false;
+  ERROR_REPORTING = true;
+  JAVA_UNICODE_ESCAPE = false;
+  UNICODE_INPUT = false;
+  IGNORE_CASE = false;
+  USER_TOKEN_MANAGER = false;
+  USER_CHAR_STREAM = false;
+  BUILD_PARSER = true;
+  BUILD_TOKEN_MANAGER = true;
+  SANITY_CHECK = true;
+  FORCE_LA_CHECK = false;
+}
+
+PARSER_BEGIN(OBO)
+package tools.goanalysis.parser;
+
+import java.util.HashMap;
+import java.util.Vector;
+import java.util.Map;
+import tools.goanalysis.LHashMap;
+import tools.goanalysis.StanzaMap;
+
+import java.net.URL;
+
+public class OBO {
+
+  public static void main(String args[]) throws ParseException {
+    OBO parser = new OBO(System.in);
+    Vector<StanzaMap> res = parser.ParseOBOStream();
+    java.util.Enumeration<StanzaMap> e = res.elements();
+    while (e.hasMoreElements()) {
+      StanzaMap v = (StanzaMap) e.nextElement();
+      v.print();
+      System.out.println();
+    }
+  }
+
+  public static Vector<StanzaMap> parseOBOFile(String file) throws ParseException {
+    try {
+      System.out.println("Reading file " + file);
+      OBO parser;
+      if (file.startsWith("http:")) {
+        URL url = new URL(file);
+        parser = new OBO(url.openStream());
+      }
+      else {
+        parser = new OBO(new java.io.FileInputStream(file));
+      }
+      Vector<StanzaMap> res = parser.ParseOBOStream();
+      java.util.Enumeration<StanzaMap> e = res.elements();
+      return res;
+    }
+    catch(java.io.IOException e) {
+      throw new ParseException("Can't read file : " + file);
+    }
+  }
+
+}
+
+PARSER_END(OBO)
+
+<*> TOKEN :
+{
+  <#ALPHA_CHAR: ["a"-"z", "A"-"Z"] >
+| <#NUM_CHAR:   ["0"-"9"] >
+| <#ALPHANUM_CHAR: [ "a"-"z", "A"-"Z", "0"-"9" ] >
+| <#ID_CHAR: [ "a"-"z", "A"-"Z", "0"-"9", "_", "-", "."] >
+| <#ID: <ALPHANUM_CHAR> (<ID_CHAR>)* >
+| <#WHITESPACE: ( " " | "\t" | "\n" | "\r" ) >
+| <#NEWLINE:    ( "\r\n" | "\r" | "\n" ) >
+}
+
+MORE :
+{   
+  "!" : IN_SINGLE_LINE_COMMENT
+}
+
+<IN_SINGLE_LINE_COMMENT> SPECIAL_TOKEN :
+{
+  <SINGLE_LINE_COMMENT: <NEWLINE> > : DEFAULT
+}
+
+<IN_SINGLE_LINE_COMMENT> MORE :
+{ 
+  < ~[] >
+}
+
+
+<DEFAULT> TOKEN :
+{
+  < SPACE:    ( " " | "\t" )+ >
+| < EOL:    <NEWLINE> >
+| < FORMATVERSION: "format-version"> : LexLine
+| < TYPEREF: "typeref"> : LexLine
+| < DEF:    ("def" | "definition") >
+| < IDENTIFIER:    <ID> > : LexLine
+| < COLON:    ":" >
+| < ESC_CHR:    "\\" 
+    ["n", "w", "t", ":", ",", "\"", "\\", "(", ")", "[", "]", "{", "}"] >
+| < STRING_START:  "\""    > : LexString
+}
+
+<LexLine> TOKEN :
+{
+  < LCOLON:    ":" > : LexLine
+| < LINE_END: <NEWLINE> > : DEFAULT
+| < LINE_WORD: ~["\n", "\r"]  > : LexLine
+}
+
+<LexString> TOKEN :
+{
+  < STRING_END: "\"" > : DEFAULT
+| < STRING_WORD: (~["\""]) | "\\" "\"" > : LexString
+}
+
+Vector<StanzaMap> ParseOBOStream() :
+{
+    LHashMap<String,String> map = null;
+    StanzaMap st = null;
+    Vector<StanzaMap> res = new  Vector<StanzaMap>();
+}
+{
+  map = header() { st = new StanzaMap(map, "Header"); res.add(st); }
+  ( st = stanza() { res.add(st);} )* 
+  <EOF>
+  {
+    return res;
+  }
+}
+
+LHashMap<String,String> header() :
+{
+    LHashMap<String,String> map;
+}
+{
+    map = tagValuePairs()
+    {
+        return map;
+    }
+}
+
+StanzaMap stanza() :
+{
+    LHashMap<String,String> map;
+    Token t1 = null;
+}
+{
+  "[" t1=<IDENTIFIER> (<LINE_WORD> )* <LINE_END>
+  map=tagValuePairs()
+  {
+    return new StanzaMap(map, t1.image);
+  }
+}
+
+LHashMap<String,String> tagValuePairs() :
+{
+    LHashMap<String,String> map = new LHashMap<String,String>();
+    HashMap<String,String> tmp = null;
+}
+{
+  ( tmp=tagValuePair() {
+        map.putAllMap(tmp);
+    }) *
+  {
+    return map;
+  }
+}
+
+HashMap<String,String> tagValuePair() :
+{ 
+    String key;
+    String val;
+    Token t1 = null;
+    String t2 = null;
+    String t3 = null;
+    HashMap<String,String> map = new HashMap<String,String>();
+}
+{
+  (t1=<IDENTIFIER> <LCOLON> (<SPACE>)* t2=tagValue()
+  | t1=<FORMATVERSION> <LCOLON> (<SPACE>)* t2=tagValue()
+  | t1=<TYPEREF> <LCOLON> (<SPACE>)* t2=tagValue()
+  | t1=<DEF> <COLON> (<SPACE>)* t2=parseString() (<SPACE>)* t3=dbxRef()
+  | <SPACE> <EOL>
+  | <EOL>)
+  {
+    if (t1 == null || t2 == null) {
+        return null;
+    }
+    key = t1.image;
+    val = t2;
+    if (t3 != null) {
+        val = val + " " + t3;
+    }
+    map.put(key, val);
+    return map;
+  }
+}
+
+String dbxRef() :
+{ 
+    StringBuffer res= new StringBuffer(); 
+    Token t1 = null;
+}
+{
+    "[" {res.append("[");}
+    [ t1=<COLON> {res.append(t1.image);} ]
+    t1=<IDENTIFIER> {res.append(t1.image);}
+    (t1=<LINE_WORD> {res.append(t1.image);}
+    | t1=<LCOLON> {res.append(t1.image);} )* t1=<LINE_END>
+    {
+        res.append(t1.image);
+        return res.toString();
+    }
+}
+
+String tagValue() :
+{ 
+    StringBuffer res= new StringBuffer(); 
+    Token t1 = null;
+}
+{
+  (t1=<LINE_WORD> {res.append(t1.image);} 
+    | t1=<LCOLON> {res.append(t1.image);} )* t1=<LINE_END>
+    {
+        res.append(t1.image);
+        return res.toString();
+    }
+}
+
+String parseString() :
+{ 
+    StringBuffer res= new StringBuffer(); 
+    Token t1 = null;
+}
+{
+    t1=<STRING_START> { res.append(t1.image);}
+    ( t1=<STRING_WORD> { res.append(t1.image);} )* 
+    t1=<STRING_END>
+    { 
+        res.append(t1.image);
+        return res.toString();
+    }
+}

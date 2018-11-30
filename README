@@ -1,0 +1,18 @@
+
+Command:
+
+Examples:
+
+java -Xms64m -Xmx512m -jar dist/lib/tools.jar test2.pcl
+
+stepminer http://chicory.stanford.edu/~sahoo/public/StepMiner/t-cell-control-cd3.pcl
+
+A complex run:
+
+stepminer \
+--onnFile "http://www.geneontology.org/ontology/gene_ontology.obo" \
+--annFile "http://www.geneontology.org/gene-associations/gene_association.goa_human.gz" \
+--range 3:17 --geneIndex 1 --splitIndex 1 -o label.html \
+http://chicory.stanford.edu/~sahoo/public/StepMiner/t-cell-control-cd3.pcl
+
+

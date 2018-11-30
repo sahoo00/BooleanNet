@@ -1,0 +1,28 @@
+
+Installation (Unix)
+
+   > mkdir lib
+
+get JArgs from http://jargs.sourceforge.net/
+    copy jargs.jar to lib/jargs.jar
+
+define JAVACC_HOME and JAVACC_EXEC path
+
+get JFlex from http://sourceforge.net/projects/jflex/
+    copy JFlex.jar to lib/JFlex.jar
+
+get CUP from http://www.cs.princeton.edu/~appel/modern/java/CUP/
+    copy java_cup.jar to lib/java_cup.jar
+
+get JarBundler from http://informagen.com/JarBundler/
+    copy jarbundler-1.9.jar to lib/jarbundler-1.9.jar
+
+run build.xml using ant
+
+   > ant
+
+Running StepMiner:
+
+   > bash stepminer --gui
+   > bash stepminer demoexamples/yeast.pcl -o yeast-step.pcl
+

@@ -1,0 +1,615 @@
+<?xml version="1.0"?>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
+  "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd" >
+
+<book>
+  <bookinfo>
+    <title>StepMiner Tutorial</title>
+    
+    <author>
+      <firstname>Debashis</firstname>
+      <surname>Sahoo</surname>
+      <affiliation>
+        <address><email>sahoo at stanford edu</email></address>
+      </affiliation>
+    </author>
+
+    <author>
+      <firstname>David</firstname>
+      <surname>Dill</surname>
+      <affiliation>
+        <address><email>dill at cs stanford edu</email></address>
+      </affiliation>
+    </author>
+
+    <copyright>
+      <year>2006</year>
+      <holder> All rights reserved.</holder>
+    </copyright>
+
+    <abstract>
+      <para>
+  StepMiner is a new method for analyzing time course microarray data that
+extracts transitions between two states, up-regulated and down-regulated.
+For each gene, StepMiner reports the model that best matches its behavior.
+The models are sequences of one or two transitions.  The rising or falling
+direction and the time of occurrence of each transition is reported.
+      </para>
+    </abstract>
+  </bookinfo>
+
+  <preface>
+    <title>What is StepMiner?</title>
+      <para>
+  StepMiner is a new method for analyzing time course microarray data that
+extracts transitions between two states, up-regulated and down-regulated.
+For each gene, StepMiner reports the model that best matches its behavior.
+The models are sequences of one or two transitions.  The rising or falling
+direction and the time of occurrence of each transition is reported.
+      </para>
+  </preface>
+      
+  <chapter>
+    <title> Download </title>
+
+    <para>
+    StepMiner software can be downloaded using following links.
+    <simplelist>
+    <member>Unix</member>
+    <member><ulink url="http://chicory.stanford.edu/~sahoo/public/StepMiner/StepMiner-1.0.tar.gz"> Java 1.5 tar.gz file </ulink> </member>
+    <member><ulink url="http://chicory.stanford.edu/~sahoo/public/StepMiner/StepMiner-1.0-java-1.4.tar.gz"> Java 1.4 tar.gz file</ulink> </member>
+    <member>Windows</member>
+    <member><ulink url="http://chicory.stanford.edu/~sahoo/public/StepMiner/StepMiner-1.0.zip"> Java 1.5 zip file </ulink> </member>
+    <member><ulink url="http://chicory.stanford.edu/~sahoo/public/StepMiner/StepMiner-1.0-java-1.4.zip"> Java 1.4 zip file</ulink> </member>
+    <member>MAC OS X</member>
+    <member><ulink url="http://chicory.stanford.edu/~sahoo/public/StepMiner/StepMiner-1.0-osx.zip"> Java 1.4 zip file </ulink> </member>
+    </simplelist>
+    </para>
+  </chapter>
+
+  <chapter>
+    <title> Install </title>
+    <sect1>
+    <title> Windows </title>
+    <para>
+    Unzip the file <filename> StepMiner-1.0.zip </filename>.
+    </para>
+    <screenshot>
+    <screeninfo>StepMiner-1.0 Folder</screeninfo>
+    <mediaobject>
+    <imageobject> 
+    <imagedata fileref="unzip.png" align="center" format="PNG"/>
+    </imageobject> 
+    <caption>
+    <para>Content of StepMiner-1.0 folder under Windows-XP </para>
+    </caption>
+    </mediaobject>
+    </screenshot>
+    </sect1>
+
+    <sect1>
+    <title> Unix </title>
+    <para>
+    Unzip the file  <filename> StepMiner-1.0.tar.gz </filename> using following command.
+    </para>
+    <programlisting>
+    > tar xvzf StepMiner-1.0.tar.gz
+    StepMiner-1.0/
+    StepMiner-1.0/stepminer-1.0.jar
+    StepMiner-1.0/yeast.pcl
+    StepMiner-1.0/serum.pcl
+    StepMiner-1.0/hongjuan-10uM.pcl
+    StepMiner-1.0/gene_association.goa_human
+    StepMiner-1.0/gene_association.sgd
+    StepMiner-1.0/gene_ontology.obo
+    StepMiner-1.0/images/
+    StepMiner-1.0/images/stepAna.ico
+    StepMiner-1.0/doc/
+    StepMiner-1.0/doc/CVS/
+    StepMiner-1.0/doc/CVS/Root
+    StepMiner-1.0/doc/CVS/Repository
+    StepMiner-1.0/doc/CVS/Entries
+    StepMiner-1.0/doc/tutotial.sgm
+    StepMiner-1.0/stepminer.bat
+    StepMiner-1.0/stepminer
+    </programlisting>
+    </sect1>
+    <sect1>
+    <title> MAC OS X </title>
+    <para>
+    Unzip the file  <filename> StepMiner-1.0-osx.zip </filename> and
+    move the directory to a convenient location.
+    </para>
+    </sect1>
+  </chapter>
+
+  <chapter>
+    <title> Getting started </title>
+    <sect1>
+    <title> Introduction </title>
+    <para>
+    For Windows users, please refer to <xref linkend="windows"/>
+    for getting started with an example. Other OS users can use
+    <xref linkend="unix"/> and <xref linkend="macosx"/> for start.
+    </para>
+    </sect1>
+    <sect1>
+    <title> File descriptions </title>
+    <variablelist>
+    <varlistentry>
+    <term><filename>stepminer-1.0.jar</filename></term>
+    <listitem><para>The StepMiner tool in Java archive format (.jar).
+    </para></listitem>
+    </varlistentry>
+    <varlistentry>
+    <term><filename>stepminer</filename></term>
+    <term><filename>stepminer.bat</filename></term>
+    <listitem><para>Scripts to run StepMiner. For unix systems use
+    <filename>stepminer</filename> and for Windows systems use 
+    <filename>stepminer.bat</filename>.
+    </para></listitem>
+    </varlistentry>
+    <varlistentry>
+    <term><filename>images/*</filename></term>
+    <listitem><para>The StepMiner icons.
+    </para></listitem>
+    </varlistentry>
+    <varlistentry>
+    <term><filename>doc/*</filename></term>
+    <listitem><para>The StepMiner documentations in docbook SGML format.
+    </para></listitem>
+    </varlistentry>
+    <varlistentry>
+    <term><filename>gene_association.goa_human</filename></term>
+    <term><filename>gene_association.sgd</filename></term>
+    <listitem><para> These are gene annotations files downloaded from 
+    <ulink url="http://www.geneontology.org"> http://www.geneontology.org
+    </ulink> for human and yeast respectively. 
+    The gene annotations are used
+    for the "GO analysis" functionality in StepMiner.
+    </para></listitem>
+    </varlistentry>
+    <varlistentry>
+    <term><filename>gene_ontology.obo</filename></term>
+    <listitem><para>The gene ontology in OBO format. This is also 
+    downloaded from
+    <ulink url="http://www.geneontology.org"> http://www.geneontology.org
+    </ulink>.
+    The gene ontology is used
+    for the "GO analysis" functionality in StepMiner.
+    </para></listitem>
+    </varlistentry>
+    <varlistentry>
+    <term><filename>yeast.pcl</filename></term>
+    <listitem><para> Yeast time course data from Brauer, et al. </para>
+    <simplelist>
+    <member>
+Matthew J. Brauer, Alok J. Saldanha, Kara Dolinski, and David Botstein
+    </member>
+    <member>
+        <emphasis>Homeostatic Adjustment and Metabolic Remodeling in
+Glucose-limited Yeast Cultures</emphasis> 
+    </member>
+    <member>
+        Mol. Biol. Cell 2005 16: 2503-2517. <emphasis>First Published
+on March 9 2005; 10.1091/mbc.E04-11-0968</emphasis>
+    </member>
+    <member>
+<ulink url="http://www.molbiolcell.org/cgi/content/abstract/16/5/2503">[Abstract]</ulink>
+<ulink url="http://www.molbiolcell.org/cgi/content/full/16/5/2503">[Full Text]</ulink>
+<ulink url="http://www.molbiolcell.org/cgi/reprint/16/5/2503">[PDF]</ulink>
+<ulink url="http://www.molbiolcell.org/cgi/content/full/E04-11-0968/DC1">[Supplemental
+Material]</ulink>
+    </member>
+    </simplelist>
+    </listitem>
+    </varlistentry>
+    <varlistentry>
+    <term><filename>serum.pcl</filename></term>
+    <listitem><para> Serum response time course microarray data.</para>
+<para>
+<ulink url="http://biology.plosjournals.org/perlserv/?request=get-document&#38;doi=10.1371/journal.pbio.0020007">
+    <inlinemediaobject>
+    <imageobject> 
+    <imagedata fileref="http://biology.plosjournals.org/images/icons/03-plbi-ra-0352r2_tn.gif" width="70" depth="70" align="left" format="GIF"/>
+    </imageobject> 
+    </inlinemediaobject>
+</ulink>
+<emphasis>
+            Gene Expression Signature of Fibroblast Serum Response
+Predicts Human Cancer Progression: Similarities between Tumors and
+Wounds.
+</emphasis>
+Howard Y. Chang,&#160;Julie B. Sneddon,&#160;Ash A. Alizadeh,&#160;
+Ruchira Sood,&#160;Rob B. West,&#160;Kelli Montgomery,&#160;
+Jen-Tsan Chi,&#160;Matt van de Rijn,&#160;
+David Botstein,&#160;Patrick O. Brown
+<ulink url="http://biology.plosjournals.org/perlserv/?request=get-document&#38;doi=10.1371/journal.pbio.0020007">Full-text</ulink> |
+<ulink url="http://biology.plosjournals.org/perlserv/?request=get-pdf&#38;file=10.1371_journal.pbio.0020007-L.pdf">Print PDF (3477K)</ulink>         |
+<ulink url="http://biology.plosjournals.org/perlserv/?request=get-pdf&#38;file=10.1371_journal.pbio.0020007-S.pdf">Screen PDF (496K)</ulink> |
+<ulink url="http://biology.plosjournals.org/perlserv/?request=get-document&#38;doi=10.1371/journal.pbio.0020039"> Synopsis </ulink>
+</para>
+    </listitem>
+    </varlistentry>
+    <varlistentry>
+    <term><filename>hongjuan-10uM.pcl</filename></term>
+    <listitem><para> Time course microarray data from Zhao et al.</para>
+    <simplelist>
+    <member>
+    Hongjuan Zhao, Michael L. Whitfield, Tong Xu, David Botstein, and James D. Brooks
+    </member>
+    <member><emphasis>Diverse Effects of Methylseleninic Acid on the
+Transcriptional Program of Human Prostate Cancer Cells</emphasis>
+    </member>
+    <member>Mol. Biol. Cell 2004 15: 506-519. First Published on
+    November 14 2003; 10.1091/mbc.E03-07-0501 </member>
+    <member>
+    <ulink url="http://www.molbiolcell.org/cgi/content/abstract/15/2/506">[Abstract]</ulink>
+    <ulink url="http://www.molbiolcell.org/cgi/content/full/15/2/506">[Full Text]</ulink>
+    <ulink url="http://www.molbiolcell.org/cgi/reprint/15/2/506">[PDF]</ulink>
+    </member>
+    </simplelist>
+    </listitem>
+    </varlistentry>
+
+    </variablelist> 
+    </sect1>
+    <sect1 id="windows">
+    <title> Windows </title>
+    <screenshot>
+    <screeninfo>StepMiner-1.0 Folder</screeninfo>
+    <mediaobject>
+    <imageobject> 
+    <imagedata fileref="unzip.png" align="center" format="PNG"/>
+    </imageobject> 
+    <caption>
+    <para>Content of StepMiner-1.0 folder under Windows-XP </para>
+    </caption>
+    </mediaobject>
+    </screenshot>
+    <para> Double click on stepminer MS-DOS batch file. StepMiner will appear
+    shortly </para>
+    <screenshot>
+    <screeninfo>StepMiner window</screeninfo>
+    <mediaobject>
+    <imageobject> 
+    <imagedata fileref="stepminer-win.png" align="center" format="PNG"/>
+    </imageobject> 
+    <caption>
+    <para>StepMiner window </para>
+    </caption>
+    </mediaobject>
+    </screenshot>
+    <para> open the file <filename> yeast.pcl </filename> using  
+    <menuchoice>
+    <guimenu>File</guimenu>
+    <guimenuitem>Open</guimenuitem>
+    </menuchoice>
+    </para>
+    <screenshot>
+    <screeninfo>StepMiner opening  <filename> yeast.pcl </filename> </screeninfo>
+    <mediaobject>
+    <imageobject> 
+    <imagedata fileref="open.png" align="center" format="PNG"/>
+    </imageobject> 
+    <caption>
+    <para>  Enter <filename> yeast.pcl </filename>. </para>
+    </caption>
+    </mediaobject>
+    </screenshot>
+    <para> StepMiner opens <filename> yeast.pcl </filename> and
+    displays the headers and the heatmap. On the left StepMiner displays
+    the headers and the timepoints assigned to each array. 
+    To change the time points
+    assigned by the StepMiner, update the text area next to each header
+    and click apply button below. On the right StepMiner displays the
+    heatmap. The heatmap color settings can be changed using 
+    <menuchoice>
+    <guimenu>Settings</guimenu>
+    <guimenuitem>"Change Settings"</guimenuitem>
+    </menuchoice>. By default it uses green as low, black as zero and
+    red as high.
+    </para>
+    <screenshot>
+    <screeninfo>StepMiner opening  <filename> yeast.pcl </filename> </screeninfo>
+    <mediaobject>
+    <imageobject> 
+    <imagedata fileref="open-yeast.png" align="center" format="PNG"/>
+    </imageobject> 
+    <caption>
+    <para>  <filename> yeast.pcl </filename> opened. </para>
+    </caption>
+    </mediaobject>
+    </screenshot>
+    <para> Click on StepMiner button or click on <menuchoice>
+    <guimenu>Analyze</guimenu>
+    <guimenuitem>StepMiner</guimenuitem>
+    </menuchoice> menu item to run StepMiner on the file opened.
+   </para>
+    <screenshot>
+    <screeninfo>StepMiner output</screeninfo>
+    <mediaobject>
+    <imageobject> 
+    <imagedata fileref="stepminer-save.png" align="center" format="PNG"/>
+    </imageobject> 
+    <caption>
+    <para>Enter a filename to save the StepMiner results in PCL format.
+    </para>
+    </caption>
+    </mediaobject>
+    </screenshot>
+    <para>
+The output file will be in PCL format, but the genes will be reordered
+ by StepMiner as described below.  The PCL file can be explored using
+    <ulink url="http://jtreeview.sourceforge.net/"> Java Treeview </ulink>.
+    </para>
+    <screenshot>
+    <screeninfo>Running StepMiner</screeninfo>
+    <mediaobject>
+    <imageobject> 
+    <imagedata fileref="stepminer-run.png" align="center" format="PNG"/>
+    </imageobject> 
+    <caption>
+    <para>Result of the StepMiner analysis is displayed in a dialog box. </para>
+    </caption>
+    </mediaobject>
+    </screenshot>
+    <para> The StepMiner results report the number of one-step (Up or Down) 
+    and the number of two-step (UpDown or DownUp) matches. 
+    The number reported as
+    "Rest" indicates the number of genes that didn't match any steps with
+    the given p-value cutoff. The pvalue cutoff for the StepMiner can be
+    adjusted using 
+    <menuchoice>
+    <guimenu>Settings</guimenu>
+    <guimenuitem>"Change Settings"</guimenuitem>
+    </menuchoice>. The numbers reported under "Total" are the total number of
+    genes and arrays used for the StepMiner analysis.
+    </para>
+    <para> Click on "ok". </para>
+    <screenshot>
+    <screeninfo>yeast.pcl heatmap</screeninfo>
+    <mediaobject>
+    <imageobject> 
+    <imagedata fileref="stepminer-heatmap.png" align="center" format="PNG"/>
+    </imageobject> 
+    <caption>
+    <para><filename> yeast.pcl </filename> heatmap after StepMiner analysis.</para>
+    </caption>
+    </mediaobject>
+    </screenshot>
+    <para>
+    The heatmap clearly shows the steps in the gene expression.
+    Genes are ordered as follows:  The one-step genes are first, followed by
+the two-step genes, followed by genes that could not be classified.
+The one-step and two-step genes are further subdivided by whether
+the first transition is increasing or decreasing (the increasing genes
+are first).  Within those groups, genes are then sorted by the time of
+the first transition, with earlier transitions occuring first.
+    Genes that have the same direction and time of transitions are ordered
+    according to the p-values of the StepMiner.
+    </para>
+    <sect2>
+    <title> Gene Ontology Analysis </title>
+    <para>
+    After StepMiner analysis has been run, an analysis using the
+gene ontology can be performed to see if gene annotations for
+certain functions, processes or components are enriched during
+sets of genes that change in the same way.
+    </para>
+    <para>
+    StepMiner's algorithm is derived from that in Gavin Sherlock's 
+GOTermFinder perl script, but has some additional pruning heuristics to
+preferentially report more specific annotations.
+    </para>
+    <para>In order to run GO analysis on the StepMiner results, the name of
+    the organism must be specified in the settings. The default value for
+    the organism is set to "Hs" (Human). The GO analysis program 
+    looks for gene annotation file for the organism speciifed 
+    and gene ontology file 
+    in the current working directory. The GO analysis program matches
+    the gene name from the second column of the PCL file to the 
+    gene names present in the gene annotation file and perform a
+    hypergeometric distributation based statistic. The GO analysis
+    program also prunes significant generic GO terms that 
+    includes many significant specific GO terms.
+    </para>
+    <para>
+    Following are the annotation files and 
+    links that are used for different organisms. </para>
+    <table xml:id="ex.htmltable" align="center">
+    <caption>Gene annotation files and their source link</caption>
+    <thead>
+      <tr>
+        <td>Organism</td>
+        <td>Description</td>
+        <td>Gene annotation file</td>
+      </tr>
+    </thead>
+    <tbody>
+    <tr>
+    <td> Sgd </td>
+    <td> Budding yeast </td>
+    <td> <ulink url="http://www.geneontology.org/gene-associations/gene_association.sgd.gz"> gene_association.sgd </ulink> </td>
+    </tr>
+    <tr>
+    <td> Hs </td>
+    <td> Human </td>
+    <td> <ulink url="http://www.geneontology.org/gene-associations/gene_association.goa_human.gz"> gene_association.goa_human </ulink> </td>
+    </tr>
+    <tr>
+    <td> Mm </td>
+    <td> Mice </td>
+    <td> <ulink url="http://www.geneontology.org/cgi-bin/downloadGOGA.pl/gene_association.mgi.gz"> gene_association.mgi </ulink> </td>
+    </tr>
+    <tr>
+    <td> Pombie </td>
+    <td> Fission yeast </td>
+    <td> <ulink url="http://www.geneontology.org/cgi-bin/downloadGOGA.pl/gene_association.GeneDB_Spombe.gz"> gene_association.GeneDB_Spombe </ulink> </td>
+    </tr>
+    </tbody>
+    </table>
+    <para> Click on <menuchoice>
+    <guimenu>Settings</guimenu>
+    <guimenuitem>"Change Settings"</guimenuitem>
+    </menuchoice> menu item.
+   </para>
+    <para> Change the "Organism" option to "Sgd" in "GOAnalysis" section </para>
+    <screenshot>
+    <screeninfo>Settings for GO Analysis</screeninfo>
+    <mediaobject>
+    <imageobject> 
+    <imagedata fileref="go-setting.png" align="center" format="PNG"/>
+    </imageobject> 
+    <caption>
+    <para>GO Analysis settings</para>
+    </caption>
+    </mediaobject>
+    </screenshot>
+    <para> Click on "ok".</para>
+    <para> Click on GOAnalysis button or <menuchoice>
+    <guimenu>Analyze</guimenu>
+    <guimenuitem>GOAnalysis</guimenuitem>
+    </menuchoice> menu item.
+   </para>
+    <screenshot>
+    <screeninfo>StepMiner GOAnalysis</screeninfo>
+    <mediaobject>
+    <imageobject> 
+    <imagedata fileref="go-ana-file.png" align="center" format="PNG"/>
+    </imageobject> 
+    <caption>
+    <para>File save dialog after GOAnalysis. Enter <filename> yeast.html </filename>. </para>
+    </caption>
+    </mediaobject>
+    </screenshot>
+    <para>Click on "Save" button to run the GOAnalysis. It might take several
+    minutes for the GO anlysis to finish. StepMiner window will not respond
+    until after the GO analysis finished.</para>
+    <para> The results of GO analysis is saved in file <ulink url="yeast.html">
+    yeast.html </ulink> </para>
+    <para> After the GO analysis is finished, open <filename> yeast.html </filename>
+    using a web browser. </para>
+    <screenshot>
+    <screeninfo>GOAnalysis</screeninfo>
+    <mediaobject>
+    <imageobject> 
+    <imagedata fileref="go-html-first.png" align="center" format="PNG"/>
+    </imageobject> 
+    <caption>
+    <para> GO Analysis on the StepMiner results.</para>
+    </caption>
+    </mediaobject>
+    </screenshot>
+    <para> The GO Analysis is performed on the gene sets of
+    the StepMiner program. The results are grouped into four
+    different categories: one-step (up regulated and down regulated),
+    two-step (up-down and down-up). The user can browse the results
+    by clicking on the 
+    <inlinemediaobject>
+    <imageobject> 
+    <imagedata fileref="http://chicory.stanford.edu/~sahoo/public/plus.gif" format="GIF"/>
+    </imageobject> 
+    </inlinemediaobject>
+    . Cick on "ExpandDepth 2" to see all the significant GO terms.
+    </para>
+    <screenshot>
+    <screeninfo>GOAnalysis</screeninfo>
+    <mediaobject>
+    <imageobject> 
+    <imagedata fileref="go-html-depth2.png" align="center" format="PNG"/>
+    </imageobject> 
+    <caption>
+    <para> Significant GO terms.</para>
+    </caption>
+    </mediaobject>
+    </screenshot>
+    <para> "Other genes: No Match" contains the list if genes 
+    that have none of the GO terms significant. The results show
+    the significant GO terms followed by a list of statistics.
+    In this example
+    the list of genes at "Step 3" have 43 genes, 7 of them have
+    aerobic respiration annotation, 16 of them have mitochondrion etc.
+    Total number of genes in the gene annotation file is 6462,
+    78 of them have aerobic respiration annotation and 711 of them
+    have mitochondrion etc. The following three number represent p-values
+    using the hypergeometric distribution, using FDR correction and
+    using the Bonferroni correction. The GO term id follows the pvalues
+    e.g. GO:0009060 is the GO term id for aerobic respiration.
+    </para>
+
+    </sect2>
+    <sect2>
+    <title> Were you successful? </title>
+    <para>
+    If not, please contact us at 
+        <ulink url="mailto:sahoo at stanford dot edu"> 
+        sahoo at stanford dot edu
+        </ulink> or 
+        <ulink url="mailto:dill at cs dot stanford dot edu"> 
+        dill at cs dot stanford dot edu
+        </ulink>.
+    </para>
+
+    <para>
+ We would also like to here any feedback, requests, or comments
+ you may have.  We expect to improve and enhance StepMiner greatly
+ in the future.
+    </para>
+
+    </sect2>
+    </sect1>
+
+    <sect1 id="unix">
+    <title> Unix </title>
+    <para> The StepMiner program is invoked using following commands. </para>
+    <programlisting>
+    > cd StepMiner-1.0
+    > bash stepminer
+    </programlisting>
+    <para>
+    Follow the steps described in Windows section after the StepMiner GUI
+    appear in the screen.
+    </para>
+    </sect1>
+    <sect1 id="macosx">
+    <title> MAC OS X </title>
+    <para>
+    Open the folder <filename> StepMiner-1.0-osx </filename> and double
+    click on the StepMiner application.
+    </para>
+    </sect1>
+  </chapter>
+
+  <chapter>
+    <title> File formats </title>
+    <para>
+        StepMiner accepts a 
+        <ulink url="http://smd.stanford.edu/help/formats.shtml#pcl"> 
+        PCL file 
+        </ulink> for the time course microarray data. The file format
+        for PCL file is described in Stanford Microarray Database (SMD) at
+        <ulink url="http://smd.stanford.edu/help/formats.shtml#pcl">
+        http://smd.stanford.edu/help/formats.shtml#pcl
+        </ulink>. StepMiner assumes that the arrays are ordered according
+        to the time course. It assigns a number from 0 to (n-1) by default
+        for the time course (n = number of time points). If the headers
+        have a floating point number in them, StepMiner uses them as time
+        points instead of numbers from 0 to (n-1).
+    </para>
+
+    <para>
+        For GO Analysis StepMiner requires a 
+        gene ontology file in 
+        <ulink url="http://www.geneontology.org/GO.format.shtml#oboflat">
+        OBO </ulink> format and a gene annotation file in
+        <ulink url="http://www.geneontology.org/GO.annotation.shtml#file">
+        15 columns </ulink> format. In addition to this StepMiner requires
+        the second column of the PCL file describe the gene name. The gene
+        names are matched against the names that are present in the
+        gene annotation file. Therefore, any names that are not present
+        in the gene annotation file are discarded.
+    </para>
+  </chapter>
+
+</book>

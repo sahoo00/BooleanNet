@@ -1,0 +1,276 @@
+/*
+
+Copyright (c) 2006, the Board of Trustees of Leland
+Stanford Junior University.
+
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+    * Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+
+    * Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the following disclaimer
+in the documentation and/or other materials provided with the
+distribution.
+
+    * Neither the name of Stanford University nor the names of its
+contributors may be used to endorse or promote products derived from
+this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+*/
+
+/*
+ Author: Debashis Sahoo <sahoo@stanford.edu>
+ */
+
+
+options {
+  LOOKAHEAD = 1;
+  CHOICE_AMBIGUITY_CHECK = 2;
+  OTHER_AMBIGUITY_CHECK = 1;
+  STATIC = false;
+  DEBUG_PARSER = false;
+  DEBUG_LOOKAHEAD = false;
+  DEBUG_TOKEN_MANAGER = false;
+  ERROR_REPORTING = true;
+  JAVA_UNICODE_ESCAPE = false;
+  UNICODE_INPUT = false;
+  IGNORE_CASE = false;
+  USER_TOKEN_MANAGER = false;
+  USER_CHAR_STREAM = false;
+  BUILD_PARSER = true;
+  BUILD_TOKEN_MANAGER = true;
+  SANITY_CHECK = true;
+  FORCE_LA_CHECK = false;
+}
+
+PARSER_BEGIN(GML)
+package tools.graphs.parser;
+
+import java.util.*;
+import java.net.URL;
+import tools.graphs.*;
+
+public class GML {
+
+  public static void main(String args[]) throws ParseException {
+    GML parser = new GML(System.in);
+    Vector<Graph> res = parser.ParseGMLStream();
+    res.get(0).print();
+  }
+
+  public static Vector<Graph> parseGMLFile(String file) throws ParseException {
+    try {
+      System.out.println("Reading file " + file);
+      GML parser;
+      if (file.startsWith("http:")) {
+        URL url = new URL(file);
+        parser = new GML(url.openStream());
+      }
+      else {
+        parser = new GML(new java.io.FileInputStream(file));
+      }
+      Vector<Graph> res = parser.ParseGMLStream();
+      return res;
+    }
+    catch(java.io.IOException e) {
+      throw new ParseException("Can't read file : " + file);
+    }
+  }
+
+}
+
+PARSER_END(GML)
+
+<*> TOKEN :
+{
+  <#ALPHA_CHAR: ["a"-"z", "A"-"Z"] >
+| <#NUM_CHAR:   ["0"-"9"] >
+| <#SIGN:   (["+", "-"])? >
+| <#ALPHANUM_CHAR: [ "a"-"z", "A"-"Z", "0"-"9" ] >
+| <#ID_CHAR: [ "a"-"z", "A"-"Z", "0"-"9", "_", "-", "."] >
+| <#ID: <ALPHANUM_CHAR> (<ID_CHAR>)* >
+| <#REAL_B: (<NUM_CHAR>)* "." (<NUM_CHAR>)* >
+| <#REAL_E: <REAL_B> ("E" <SIGN> <NUM_CHAR>)? > 
+| <#REAL_S: <SIGN><REAL_E> > 
+| <#WHITESPACE: ( " " | "\t" | "\n" | "\r" ) >
+}
+
+SKIP : { " " | "\t" | "\n" }
+
+<DEFAULT> TOKEN :
+{
+  < GRAPH: "graph" >
+| < NODE: "node" >
+| < EDGE: "edge" >
+| < INTEGER: <SIGN>(<NUM_CHAR>)+ >
+| < REAL: <REAL_S> > 
+| < IDENTIFIER:    <ID> >
+| < STRING_START:  "\""    > : LexString
+}
+
+<LexString> TOKEN :
+{
+  < STRING_END: "\"" > : DEFAULT
+| < STRING_WORD: (~["\""]) | "\\" "\"" > : LexString
+}
+
+Vector<Graph> ParseGMLStream() :
+{
+    Vector<Graph> res = new Vector<Graph>();
+    Graph st = null;
+}
+{
+  header()
+  ( st = graph() { res.add(st);} )* 
+  <EOF>
+  {
+    return res;
+  }
+}
+
+void header() :
+{ }
+{
+    list()
+}
+
+Graph graph() :
+{
+    Graph res = new GGraph();
+    HashMap<Integer, Node> hash = null;
+}
+{
+  <GRAPH> "[" hash = nodes() edges(hash) "]"
+  {
+    Iterator<Integer> itr = hash.keySet().iterator();
+    while (itr.hasNext()) {
+        Integer id = (Integer) itr.next();
+        Node val = hash.get(id);
+        if (val.isRoot()) {
+            res.addRoot(val);
+        }
+    }
+    return res;
+  }
+}
+
+HashMap<Integer, Node> nodes() :
+{
+    HashMap<Integer, Node> map = new HashMap<Integer, Node>();
+    HashMap<String, Object> res;
+}
+{
+  (<NODE> "[" res = list() "]" {
+    Integer id = (Integer) res.get("id");
+    GNode node = new GNode(id.toString());
+    Iterator<String> itr = res.keySet().iterator();
+    while (itr.hasNext()) {
+        String key = (String) itr.next();
+        Object val = res.get(key);
+        node.setAttribute(key, val);
+    }
+    map.put(id, node);
+  }
+  )*
+  {
+    return map;
+  }
+}
+
+void edges(HashMap<Integer, Node> map) :
+{
+    HashMap<String, Object> res;
+}
+{
+  (<EDGE> "[" res = list() "]" {
+    Integer s = (Integer) res.get("source");
+    Integer d = (Integer) res.get("target");
+    Node src = map.get(s);
+    Node dst = map.get(d);
+    src.addChild(dst);
+  }
+  )*
+}
+
+HashMap<String, Object> list() :
+{
+    HashMap<String, Object> res = new HashMap<String, Object>();
+    String k = null ;
+    Object v = null ;
+}
+{
+    (k = key() v = value() { 
+        if (k.equals("label")) {
+            v = v.toString();
+        }
+        res.put(k, v); 
+    })*
+    {
+        return res;
+    }
+}
+
+String key() :
+{
+    StringBuffer res= new StringBuffer(); 
+    Token t1 = null;
+}
+{
+    t1=<IDENTIFIER>
+    {
+        res.append(t1.image);
+        return res.toString();
+    }
+}
+
+Object value() :
+{
+    Object res = null;
+    Token t1 = null;
+}
+{
+  (t1=<INTEGER> { 
+    int num = Integer.parseInt(t1.image); 
+    res = new Integer(num);
+  }
+  | t1 = <REAL> {
+    double num_d = Double.parseDouble(t1.image); 
+    res = new Double(num_d);
+  } 
+  | res = parseString() | "[" res = list() "]")
+  {
+    return res;
+  }
+}
+
+String parseString() :
+{ 
+    StringBuffer res= new StringBuffer(); 
+    Token t1 = null;
+}
+{
+    t1=<STRING_START> { res.append(t1.image);}
+    ( t1=<STRING_WORD> { res.append(t1.image);} )* 
+    t1=<STRING_END>
+    { 
+        res.append(t1.image);
+        return res.toString();
+    }
+}

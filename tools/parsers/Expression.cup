@@ -1,0 +1,368 @@
+/*
+
+Copyright (c) 2006, the Board of Trustees of Leland
+Stanford Junior University.
+
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+    * Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+
+    * Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the following disclaimer
+in the documentation and/or other materials provided with the
+distribution.
+
+    * Neither the name of Stanford University nor the names of its
+contributors may be used to endorse or promote products derived from
+this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+*/
+
+/*
+ Author: Debashis Sahoo <sahoo@stanford.edu>
+ Author: David Dill <dill@cs.stanford.edu>
+ */
+
+/* ----------------------Preliminary Declarations Section--------------------*/
+package tools.parsers.Expression;
+   
+/* Import the class java_cup.runtime.*  */
+import java_cup.runtime.*;
+import java.io.*;
+import java.util.*;
+import tools.io.NetworkInfo;
+import tools.microarray.GeneData;
+
+/* Parser code */
+parser code {:
+    NetworkInfo info_;
+    HashMap<String, GeneData> symbolTable_;
+
+    HashMap<Integer, GeneData> virtualGene_;
+    HashMap<Integer, String> virtualGeneName_;
+    int virtualGeneId_;
+
+    public void setNetworkInfo(NetworkInfo f) { 
+      info_ = f; 
+    }
+
+    public NetworkInfo getInfo() { return info_; }
+
+    public boolean hasSymbol(String i) { return symbolTable_.containsKey(i); }
+    public GeneData getSymbol(String i) { return symbolTable_.get(i); }
+    public void addSymbol(String i, GeneData d) { symbolTable_.put(i, d); }
+
+    public void addVirtual(String s, GeneData d) {
+      Integer id = new Integer(virtualGeneId_);
+      virtualGene_.put(id, d);
+      virtualGeneName_.put(id, s);
+      virtualGeneId_++;
+    }
+
+    public void printVirtualGenes() {
+      info_.printHeader();
+      Iterator<Integer> itr = virtualGene_.keySet().iterator();
+      while (itr.hasNext()) {
+        Integer id = itr.next();
+        String name = virtualGeneName_.get(id);
+        GeneData q = virtualGene_.get(id);
+        if (q != null) {
+          q.setDataAt(0, "vt_" + id.toString());
+          q.setDataAt(1, name);
+          q.setDataAt(2, "1");
+          q.print();
+        }
+      }
+    }
+
+    public void printVirtualGenesOrder() {
+      info_.printHeader();
+      for (int i =0; i < virtualGeneId_; i++) {
+        Integer id = new Integer(i);
+        String name = virtualGeneName_.get(id);
+        GeneData q = virtualGene_.get(id);
+        if (q != null) {
+          q.setDataAt(0, "vt_" + id.toString());
+          q.setDataAt(1, name);
+          q.setDataAt(2, "1");
+          q.print();
+        }
+      }
+    }
+
+:};
+
+init with {: 
+    symbolTable_ = new HashMap<String, GeneData>();
+    virtualGene_ = new HashMap<Integer, GeneData>();
+    virtualGeneName_ = new HashMap<Integer, String>();
+    virtualGeneId_ = 0;
+:};
+
+/* ------------Declaration of Terminals and Non Terminals Section----------- */
+
+terminal           SEMI, PLUS, MINUS, TIMES, DIVIDE, LPAREN, RPAREN;
+terminal           LT, GT, LEQ, GEQ, EQ, ASSN, COMMA;
+terminal           AND, OR, NOT, IMPLIES;
+terminal           PHENOTYPE, SEARCH, CSEARCH, RSEARCH, THRESHOLD; 
+terminal           VIRTUAL, LOWER, UPPER, HIGH, LOW, MED;
+terminal Double    NUMBER;
+terminal String    ID, TMPID, STRING;
+   
+non terminal GeneData query;
+non terminal	statement_list, statement_part, statement, all;
+   
+
+/* -------------Precedence and Associatively of Terminals Section----------- */
+   
+  precedence right ASSN;
+  precedence left PLUS, MINUS; 
+  precedence left TIMES, DIVIDE;
+  precedence left LT, GT, LEQ, GEQ, EQ;
+  precedence left AND;
+  precedence left OR;
+  precedence right IMPLIES;
+  precedence nonassoc NOT;
+
+/* ----------------------------Grammar Section-------------------- */
+   all ::= statement_list; 
+
+   statement_list ::= statement_list statement_part
+                      {:
+                        /* Populate Symbol table */
+                      :}
+                      | statement_part
+                      {:
+                        /* Populate Symbol table */
+                      :}
+                      ;
+
+   /* Every query returns a vector of values, one per array. */
+
+   statement_part ::= query:q SEMI
+                      {:
+                        /*
+                           System.out.print("[");
+                           if (q != null) {
+                             for (int i = 0; i < q.size(); i++) {
+                               if (i != 0) {
+                                 System.out.print(" ");
+                               }
+                               System.out.print(q.getDataAt(i));
+                             }
+                           }
+                           System.out.println("]");
+                         */
+                      :}
+                      ;
+
+   /* A query returns a set of arrays (probably a bitset) */
+   query	::= ID:i 
+		    {: 
+                        NetworkInfo info = parser.getInfo();
+			GeneData stub = info.getGeneDataByName(i);
+                        if (stub == null) {
+                            System.err.println("Error: Couldn't find " + i);
+                            System.exit(1);
+                        }
+			RESULT = stub;
+		    :}
+	         |  TMPID:i 
+			{:
+                           if (parser.hasSymbol(i)) {
+                             RESULT = parser.getSymbol(i);
+                           }
+                           else {
+                            System.err.println("Error: undefined temporary " + i);
+                            System.exit(1);
+                           }
+			:}
+		 |  NUMBER:n 
+			{: 
+                           NetworkInfo info = parser.getInfo();
+			   RESULT = info.getNumber(n);
+			:}
+	         |  VIRTUAL LPAREN STRING:s COMMA query:q RPAREN 
+			{: 
+                           parser.addVirtual(s, q);
+			   RESULT = q;
+			:}
+
+	         |  PHENOTYPE LPAREN STRING:s RPAREN 
+			{: 
+			   /* Search arrays with string s, return vector of "boolean" 
+			      values. */
+                           NetworkInfo info = parser.getInfo();
+			   RESULT = info.getPhenotype(s);
+                           if (RESULT == null) {
+                             System.err.println("Error: undefined phenotype " + s);
+                             System.exit(1);
+                           }
+			:}
+
+	         |  SEARCH LPAREN STRING:s RPAREN 
+			{: 
+			   /* Search arrays with string s, return vector of "boolean" 
+			      values. */
+                           NetworkInfo info = parser.getInfo();
+			   RESULT = info.searchPhenotype(s);
+			:}
+
+	         |  CSEARCH LPAREN STRING:s RPAREN 
+			{: /* case sensitive search */ 
+			   /* Search arrays with string s, return vector of "boolean" 
+			      values. */
+                           NetworkInfo info = parser.getInfo();
+			   RESULT = info.csearchPhenotype(s);
+			:}
+	         |  RSEARCH LPAREN STRING:s RPAREN 
+		    {:     /* Regular expression search */
+			   /* Search arrays with string s, return vector of "boolean" 
+			      values. */
+                           NetworkInfo info = parser.getInfo();
+			   RESULT = info.rsearchPhenotype(s);
+			:}
+		 |  THRESHOLD LPAREN query:q RPAREN 
+			{: 
+			   /* stepminer threshold of values in array q. */
+			   /* This should make an array with the same value
+				everywhere */
+			   RESULT = parser.getInfo().getThreshold(q);
+			:}
+		 |  UPPER LPAREN query:q RPAREN 
+			{: /* threshold + .5 of array q */ 
+			   RESULT = parser.getInfo().getUpperThreshold(q);
+			:}
+		 |  LOWER LPAREN query:q RPAREN 
+			{:  /* threshold - .5 of array q */
+			   RESULT = parser.getInfo().getLowerThreshold(q);
+			:}
+		 |  HIGH LPAREN query:q RPAREN 
+			{: /* (Boolean) pointwise q >= upper */ 
+			   RESULT = parser.getInfo().getHigh(q);
+			:}
+		 |  LOW LPAREN query:q RPAREN
+			{: /* (Boolean) pointwise q >= upper */ 
+			   RESULT = parser.getInfo().getLow(q);
+			:}
+		 |  MED LPAREN query:q RPAREN 
+			{: /* (Boolean) pointwise q >= upper */ 
+			   RESULT = parser.getInfo().getMed(q);
+			:}
+		 |  query:q1 PLUS query:q2 
+                    {: /* elementwise sum of q1, q2 */
+                       NetworkInfo info = parser.getInfo();
+                       RESULT = info.plus(q1, q2);
+                    :}
+		 |  query:q1 MINUS query:q2 
+		    {: /* elementwise diff of q1, q2 */
+                      NetworkInfo info = parser.getInfo();
+                      RESULT = info.minus(q1, q2);
+		    :}
+		 |  query:q1 TIMES query:q2 
+		    {: /* elementwise product of q1, q2 */
+                      NetworkInfo info = parser.getInfo();
+                      RESULT = info.times(q1, q2);
+		    :}
+		 |  query:q1 DIVIDE query:q2 
+		    {: /* elementwise quotient of q1, q2 */
+                      NetworkInfo info = parser.getInfo();
+                      RESULT = info.divide(q1, q2);
+		    :}
+	         |  query:q1 EQ query:q2 
+		    {: /* elementwise equality of q1, q2 */
+                       NetworkInfo info = parser.getInfo();
+		       RESULT = info.equal(q1, q2);
+		    :}
+		 |  query:q1 LT query:q2 
+		    {: /* elementwise < of q1, q2 */
+                       NetworkInfo info = parser.getInfo();
+		       RESULT = info.lessThan(q1, q2);
+		    :}
+		 |  query:q1 GT query:q2 
+		    {: /* elementwise > of q1, q2 */
+                       NetworkInfo info = parser.getInfo();
+		       RESULT = info.greaterThan(q1, q2);
+		    :}
+		 |  query:q1 LEQ query:q2
+		    {: /* elementwise <= of q1, q2 */
+                       NetworkInfo info = parser.getInfo();
+		       RESULT = info.lessThanEq(q1, q2);
+		    :}
+		 |  query:q1 GEQ query:q2
+		    {: /* elementwise >= of q1, q2 */
+                       NetworkInfo info = parser.getInfo();
+		       RESULT = info.greaterThanEq(q1, q2);
+		    :}
+	 	 |  query:q1 AND query:q2
+		    {: /* elementwise & of q1, q2 */
+                       NetworkInfo info = parser.getInfo();
+		       RESULT = info.and(q1, q2);
+		    :}
+		 |  query:q1 OR query:q2 
+		    {: /* elementwise | of q1, q2 */
+                       NetworkInfo info = parser.getInfo();
+		       RESULT = info.or(q1, q2);
+		    :}
+		 |  query:q1 IMPLIES query:q2 
+		    {: /* elementwise | of q1, q2 */
+                       NetworkInfo info = parser.getInfo();
+		       RESULT = info.implies(q1, q2);
+		    :}
+		 |  NOT query:q 
+		    {: /* elementwise 16.0-q */
+                       NetworkInfo info = parser.getInfo();
+		       RESULT = info.not(q);
+		    :}
+		 |  LPAREN query:q RPAREN 
+		    {: 
+			RESULT = q ; 
+		    :}
+                 |  TMPID:i ASSN query:q
+                    {: 
+                        parser.addSymbol(i, q);
+			RESULT = q ; 
+                    :}
+		 |  ID:i LPAREN query:q RPAREN 
+		    {: 
+			/* look up attribute or function definition i and
+			   apply to array q */
+                        NetworkInfo info = parser.getInfo();
+                        RESULT = q ;
+		    :}
+		 |  ID:i LPAREN query:q1 COMMA query:q2 RPAREN 
+		    {: 
+			/* look up attribute or function definition i and
+			   apply to array q */
+                        NetworkInfo info = parser.getInfo();
+                        if (i.equals("min")) {
+                          RESULT = info.min(q1, q2);
+                        }
+                        else if (i.equals("max")) {
+                          RESULT = info.max(q1, q2);
+                        }
+                        else {
+                          System.err.println("Error: Function not defined :" + i);
+                          System.exit(1);
+                        }
+		    :}
+                 ;
+
+
