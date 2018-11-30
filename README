@@ -15,4 +15,148 @@ stepminer \
 --range 3:17 --geneIndex 1 --splitIndex 1 -o label.html \
 http://genedesk.ucsd.edu/home/public/StepMiner/t-cell-control-cd3.pcl
 
+./stepminer
 
+Usage: tools.Analyze [-d/--debug] <filename>
+                     [-r/--reduceLog] <filename>
+                     --gui [<filename>]
+                     [options] <filename>
+Options:                                 
+       [-o/--outfile <file.ano>] [-o/--outfile <file.pcl>]
+       [-o/--outfile [<tag>:]<file.ann>] [-o/--outfile <file.exp>]
+       [-o/--outfile <file.cdt>] [-o/--outfile <file.gmx>]
+       [-o/--outfile [<tag>:]<file.ps>] [-o/--outfile <file.png>]
+       Example tags: All, Step, Up, Down, UpDown, DownUp, Rest
+       [-t/--type <type>]
+             <type> : OneStep, OneStepFdr, Fdr, 
+                      Order, Subset, ZeroCenter, MeanCenter, 
+                      None, ListGenes, Normalize,
+                      KNNimpute, LLSimpute
+       [--annFile <Gene Annotation File : 15 columns format>]
+       [--onnFile <Ontology File : OBO format>]
+       [--org <Organism: Mm/Hs/Sgd/Pombie>]
+       [--geneIndex <arrayIndex of gene description>]
+       [--splitString <Splitting regexp of the gene str>]
+       [--splitIndex <Index of gene after splitting>]
+       [--goPvalue <pvalue threshold of GOAnalysis>]
+       [--range <ex: 4:17 Range of array indices for analysis>]
+       [-p/--pvalue <pvalue threshold>]
+       [--numMissing <Number of missing timepoints>]
+       [--Intersect <file>]
+       [--Union <file>]
+       [--Select <file>] select ids with original order
+       [--SelectOrder <file>] select ids with given order
+       [--Diff <file>]
+       [--SelectNames <file>] select names with original order
+                                         
+
+./stepminer custom
+
+
+tools.CustomAnalysis <cmd> <args>
+<cmd> <args> :
+intersect         file1 file2 file3 ...
+intersectGenes    file1 file2 file3 ...
+intersectStep     spvalue file1 file2 file3 ...
+intersectStepAll  spvalue outfile file1 file2 file3 ...
+intersectStepGO   spvalue outfile onnFile annFile org pvalue file1 file2 ...
+intersectStepGS   spvalue outfile setFile org pvalue file1 file2 ...
+corr              outfile threshold file1 file2
+corrAll           outfile listIds pcl
+corrList          outfile pairsFile pcl
+corrOne           outfile pclFile num1 [num2 [start]]
+corrStep          outfile spvalue threshold file1 file2 file3
+monotonic         up/down outfile threshold file
+aracne            outfile num pclfile pairfile
+geo               outfile outInfoFile <Soft GEO file> <numArr> <Random:true/false> [symindex=8 titleindex=7] [<Exclusion list>]
+geoSampleIds      outfile <Soft GEO file>
+bimodal           <get[r]> outfile pclfile threshold
+                  getr -> reduce log data file
+bimodal           <thr[1|Bv]/pairs[Bv]/groups> outfile pclfile
+bimodal           thrBv1 outfile pclfile thrfile
+bimodal           targets outfile pclfile geneid
+bimodal           plot outfile pclfile pairfile [<info file>]
+bimodal           commonPairs outfile pclfile pairfile bitVectorFile
+bimodal           pairsBvParallel outfile BvFile start1 num1 start2 num2
+gs                outfile org pvalue file1 [file2]
+go                outfile onnFile annFile org pvalue gmtfile
+removeArray       outfile pclFile listFile
+selectArrayPCL    outfile pclFile listFile
+selectArray       outfile pclFile geneid minthreshold maxthreshold
+filter            reduceLog outfile pclFile
+filter            normalize outfile pclFile geneid
+filter            selectNames outfile pclFile nameFile
+filter            add outfile pclFile constant
+tabFile           concat outfile file1 file2
+tabFile           select outfile file1 range
+tabFile           delete outfile file1 range
+tabFile           intersect[R] outfile file1 file2large
+pie               ofile file1 file2 file3
+stats             corr ofile pclfile num
+step              ofile pclfile [<cmd> <arg>]
+                  <cmd>: timepoints, type, range, org, geneIndex,
+                         splitIndex, splitString, pvalue
+twoStep           ofile pclfile index pvalue
+twoStep1          ofile pclfile index pvalue
+shuffle           bv <outfile> <bvfile> <seed>
+                  pcl <outfile> <pclfile> <seed>
+boolean           <cmd> args
+                  bitMatrix/pairs/listMatrix/singleListMatrix ofile bvfile phfile phid pvalue statThr singleThr [listFile]
+                  commonPairs ofile old_bvfile pvalue statThr old_pairfile new_bvfile [HomologFile oldOrg newOrg]
+                  bitMatrixPrint <relationFile>
+                  bitMatrixPrintStats <relationFile>
+                  bitMatrixFill <relationFile>
+                  bitMatrixFillStats <relationFile>
+ht                N M n k
+test              <args>
+
+
+Detailed description of the command line options:
+
+TOOL="java -cp dist/lib/tools.jar -Xmx10G tools.CustomAnalysis"
+
+Use following command to generate stepminer threholds:
+
+$TOOL bimodal thr1 <outfile>.thr <inputfile>.pcl 0.5
+
+Use following command to convert gene expression to Boolean values:
+
+$TOOL bimodal thrBv1 <outfile>.bv <inputfile>.pcl <inputfile>.thr
+
+Use following commands to generate indices to access the data:
+
+perl extract.pl index <inputfile>.pcl > file.idx
+perl extract.pl index <inputfile>.bv > file.bvidx
+
+Use following commands to generate Boolean network with
+thresholds <error_rate>=0.1 <stat_thr>=3.0 <single_thr>=0.01:
+
+$TOOL boolean bitMatrix <outfile>.rl <input>.bv <input>.ph All 0.1 3.0 0.01
+$TOOL boolean bitMatrixFill <outfile>.rl
+$TOOL boolean bitMatrixFillStats <outfile>.rl
+
+error_rate : controls the number of points in the sparse quadrant.
+stat_thr:    controls whether the number of points in the sparse quadrant is
+             significantly below the expected value.
+single_thr:  controls how many points are high for each probes to be qualified
+             for the analysis.
+
+
+To retrive Boolean implication relationships:
+
+Usage : extract.pl <cmd> <args>
+<type> :
+       0 - No relation
+       1 - A low  -> B high
+       2 - A low  -> B low
+       3 - A high -> B high
+       4 - A high -> B low
+       5 - Equivalent
+       6 - Opposite
+<cmd> :
+   text <network.rl> <network.idx> <probeid> <type>
+   index <pclfile>
+
+example:
+
+perl extract.pl text <network.rl> <network.idx> <probeid> <type>
