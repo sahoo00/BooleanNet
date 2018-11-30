@@ -1,5 +1,22 @@
 #!/bin/bash
 
-java -Xms64m -Xmx512m -jar dist/lib/tools.jar "$@"
+#java -Xms64m -Xmx512m -jar dist/lib/tools.jar "$@"
+#echo
+
+export CLASSPATH="dist/lib/tools.jar"
+
+MEM=1048m
+
+if [ `uname` = "SunOS" ]; then
+  MEM=3512m
+fi
+
+case $1 in
+  custom)
+    shift;
+    java -cp "$CLASSPATH" -Xms64m -Xmx$MEM tools.CustomAnalysis "$@";;
+  *)
+    java -cp "$CLASSPATH" -Xms64m -Xmx$MEM tools.Analyze "$@";;
+esac
 echo
 
